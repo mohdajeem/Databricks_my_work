@@ -1,0 +1,29 @@
+name: Deploy Databricks Asset Bundle
+
+on:
+  push:
+    branches:
+      - main # Triggers the workflow on pushes to the main branch
+  workflow_dispatch: # Allows you to run this workflow manually from the GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    # Passing the secrets as environment variables so the Databricks CLI can pick them up
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate Bundle
+        run: databricks bundle validate -t prod
+        
+      - name: Deploy Bundle
+        run: databricks bundle deploy -t prod
